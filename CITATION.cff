@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software or experimental datasets in your research, please cite the following work."
+title: "Analytical and Simulation Framework for Coupled Resource Allocation in Quantized Containerized Services (AOAM)"
+authors:
+  - family-names: "Yaksun"
+    given-names: "Ivan"
+    orcid: "https://orcid.org/0009-0008-3487-3367"
+    affiliation: "Interregional Academy of Personnel Management (IAPM), Kyiv, Ukraine"
+license: "MIT"
+repository-code: "https://github.com/craddy89/aoam-resource-optimization"
+version: "1.0.0"
+date-released: "2026-11-16"
+keywords:
+  - "queueing theory"
+  - "resource optimization"
+  - "container scheduling"
+  - "tail latency"
+  - "discrete-event simulation"
