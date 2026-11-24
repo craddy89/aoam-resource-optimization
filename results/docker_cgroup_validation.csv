@@ -1,0 +1,6 @@
+config,u_cpu,m_wrk,mem_limit_mb,lambda_rps,completed_reqs,errors,mean_ms,p99_ms,nr_periods,nr_throttled,throttle_pct,throttled_ms,mem_peak_mb,oom_killed
+Static_Unaligned_8,2,8,1024,55.0,1625,0,851.22,2358.73,321,298,92.83,178764.2,320.8,False
+Oversized_Pool_16,2,16,1024,55.0,1313,244,1133.19,4278.48,333,317,95.2,259794.4,323.0,False
+AOAM_Aligned_2,2,2,512,55.0,1643,0,101.54,398.44,302,132,43.71,838.7,263.2,False
+AOAM_Aligned_3_High,3,3,768,85.0,2593,0,145.74,539.99,307,195,63.52,1740.1,352.7,False
+Unaligned_12_High,3,12,768,85.0,1888,750,1238.68,4601.7,346,329,95.09,226217.1,338.1,False
