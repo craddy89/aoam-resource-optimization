@@ -79,6 +79,21 @@ class TestAOAMModel(unittest.TestCase):
         sla = SLAConstraints(t_slo_ms=100.0)
         self.assertIsNone(optimize_aoam(wp, sla))
 
+    def test_global_cost_minimum_when_memory_expensive(self):
+        """When memory weight is high near saturation, higher c can be strictly cheaper than c_min."""
+        wp = WorkloadProfile(lam=112.0, mu=40.0, c_s2=1.0)
+        # At c=3, rho=0.933 so memory limit inflates nonlinearly; at c>=4, memory drops sharply.
+        sla = SLAConstraints(t_slo_ms=600.0, w_cpu=10.0, w_mem_gb=60.0)
+        from aoam_solver import evaluate_configuration
+        candidates = [evaluate_configuration(wp, sla, u_cpu=float(c), m_wrk=c) for c in range(3, 10)]
+        feasible_candidates = [x for x in candidates if x["feasible"]]
+        min_candidate = min(feasible_candidates, key=lambda x: x["cost_usd"])
+        opt = optimize_aoam(wp, sla)
+        self.assertIsNotNone(opt)
+        self.assertGreater(opt["u_cpu"], 3.0)
+        self.assertEqual(opt["u_cpu"], min_candidate["u_cpu"])
+        self.assertAlmostEqual(opt["cost_usd"], min_candidate["cost_usd"], places=6)
+
 
 if __name__ == "__main__":
     unittest.main()
