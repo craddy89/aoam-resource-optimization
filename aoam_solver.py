@@ -292,12 +292,13 @@ def optimize_aoam(
 ) -> Optional[Dict[str, float]]:
     """
     Formal Algorithm 1 (AOAM):
-    Analytically find minimum-cost feasible integer allocation (u_cpu*, m_wrk*, M_lim*)
+    Analytically find the global minimum-cost feasible integer allocation (u_cpu*, m_wrk*, M_lim*)
     satisfying SLA tail latency, throttling bound, and OOM probability bound.
 
     1) Checks necessary intrinsic feasibility: pure service quantile R_inf(0.99) <= T_SLO.
     2) Uses monotonicity of R_0.99(c) and L(c): sets aligned thread pool m_wrk = c
-       to guarantee P_thr == 0 and eliminate excess stack overhead, then finds minimal c*.
+       to guarantee P_thr == 0 and eliminate excess stack overhead, then evaluates
+       feasible integer capacities with cost lower-bound pruning (w_cpu * c >= best_cost).
     """
     # Necessary intrinsic feasibility condition (c -> inf limit)
     if abs(wp.c_s2 - 1.0) < 1e-6:
@@ -308,8 +309,14 @@ def optimize_aoam(
         return None
 
     c_min = int(math.floor(wp.lam / wp.mu)) + 1
+    best_res: Optional[Dict[str, float]] = None
+    best_cost = float("inf")
     for c in range(c_min, c_max + 1):
+        # Since M_lim > 0, no capacity with compute cost alone >= best_cost can improve Eq. (9)
+        if sla.w_cpu * c >= best_cost:
+            break
         res = evaluate_configuration(wp, sla, u_cpu=float(c), m_wrk=c)
-        if res["feasible"]:
-            return res
-    return None
+        if res["feasible"] and res["cost_usd"] < best_cost:
+            best_cost = res["cost_usd"]
+            best_res = res
+    return best_res

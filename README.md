@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Unit%20Tests-6%20Passing-brightgreen.svg)](#running-unit-tests)
+[![Tests](https://img.shields.io/badge/Unit%20Tests-7%20Passing-brightgreen.svg)](#running-unit-tests)
 
 **Author:** Ivan Y. Yaksun ([ORCID: 0009-0008-3487-3367](https://orcid.org/0009-0008-3487-3367))  
 **Affiliation:** Department of Computer Information Systems and Technologies, Interregional Academy of Personnel Management (IAPM), Kyiv, Ukraine  
@@ -39,9 +39,10 @@ Unlike heuristic autoscalers or decoupled static over-provisioning rules, the pr
 | :--- | :--- |
 | `aoam_solver.py` | Analytical queueing solver, Compound Poisson throttling model, Little's law memory model, and Algorithm 1 (`optimize_aoam`). |
 | `simulator.py` | Independent event-driven simulator modeling Poisson arrivals, periodic CPU quota replenishment $T_p$, multi-worker scheduling, and sawtooth GC cycles with real OOM detection. |
-| `run_experiments.py` | Reproducible experimental harness executing all 3 benchmark suites, exporting CSV tables (`results/`) and grayscale publication figures (`figures/`). |
-| `tests/test_aoam.py` | Automated unit test suite validating analytical reductions, monotonicity, infeasibility bounds, and zero-OOM/zero-throttling agreement with DES. |
-| `results/` | Generated empirical CSV datasets (`exp1_validation.csv`, `exp2_mgc_sensitivity.csv`, `exp3_strategy_benchmark.csv`). |
+| `run_experiments.py` | Reproducible experimental harness executing all 3 DES benchmark suites, exporting CSV tables (`results/`) and grayscale publication figures (`figures/`). |
+| `docker_validation/` | Live Docker + Linux cgroups benchmark harness (`Dockerfile`, `service.py`, `run_docker_benchmark.py`) validating CFS quota throttling and `memory.peak` under open-loop Poisson HTTP traffic. |
+| `tests/test_aoam.py` | Automated unit test suite (7 tests) validating analytical reductions, monotonicity, infeasibility bounds, global cost optimality, and zero-OOM/zero-throttling agreement with DES. |
+| `results/` | Generated empirical CSV datasets (`exp1_validation.csv`, `exp2_mgc_sensitivity.csv`, `exp3_strategy_benchmark.csv`, `docker_cgroup_validation.csv`). |
 | `figures/` | Publication-ready monochrome figures (`fig1_p99_validation.png` .. `fig4_cost_benchmark.png`). |
 | `CITATION.cff` | Standard citation metadata file for academic attribution. |
 
@@ -77,11 +78,12 @@ Expected output:
 test_aligned_pool_zero_throttling ... ok
 test_aoam_solver_satisfies_slo_and_oom_in_des ... ok
 test_erlang_c_reduces_to_mm1 ... ok
+test_global_cost_minimum_when_memory_expensive ... ok
 test_infeasible_intrinsic_slo_returns_none ... ok
 test_mm1_exact_quantile ... ok
 test_monotonicity_of_latency_and_memory ... ok
 ----------------------------------------------------------------------
-Ran 6 tests in ~0.55s
+Ran 7 tests in ~0.55s
 
 OK
 ```
@@ -102,7 +104,7 @@ This command runs:
 ## 4. Visual Summary of Experimental Findings
 
 ### Model Validation & Nonlinear Memory Coupling
-Analytical $P_{99}$ predictions match independent discrete-event simulation within **0.06% - 4.78%** across aligned configurations, while mean memory predictions track within **1.37% - 4.08%** (`results/exp1_validation.csv`). Near saturation ($\rho \to 1$), Little's Law occupancy $L$ drives steep nonlinear growth in memory demand.
+Analytical $P_{99}$ predictions match independent discrete-event simulation within **0.06% - 4.78%** across six aligned multi-server configurations (**1.79%** mean APE; **2.04%** across non-saturated configurations with $\rho \le 0.67$, and **3.55%** across all seven aligned cases including two-server near-saturation), while mean memory predictions track within **1.37% - 4.08%** (**2.53%** mean APE, `results/exp1_validation.csv`). Near saturation ($\rho \to 1$), Little's Law occupancy $L$ drives steep nonlinear growth in memory demand.
 
 | Fig. 1: Analytical vs. DES Tail Latency ($P_{99}$) | Fig. 2: Nonlinear Memory Coupling via Little's Law |
 | :---: | :---: |
